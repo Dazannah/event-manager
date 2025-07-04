@@ -18,8 +18,9 @@ export default {
   setup() {
     const router = useRouter();
     const isAuthenticated = inject("isAuthenticated");
+    const isHelpdeskAgent = inject("isHelpdeskAgent");
 
-    return { router, isAuthenticated };
+    return { router, isAuthenticated, isHelpdeskAgent };
   },
   data: initData,
   methods: {
@@ -36,6 +37,15 @@ export default {
             localStorage.setItem("token", res.data.token);
             this.axios.defaults.headers.common["Authorization"] = localStorage.getItem("token");
             this.isAuthenticated = true;
+
+            const arrayToken = localStorage.getItem("token").split(".");
+            const tokenPayload = JSON.parse(atob(arrayToken[1]));
+            const isHelpdeskAgent = tokenPayload.scopes[0] == "helpdeskAgent" ? true : false;
+            console.log(tokenPayload.scopes[0]);
+
+            this.isHelpdeskAgent = isHelpdeskAgent;
+
+            localStorage.setItem("isHelpdeskAgent", isHelpdeskAgent);
 
             this.router.replace("/dashboard");
           }
@@ -73,7 +83,7 @@ export default {
           <div class="flex items-center justify-between">
             <label for="password" class="block text-sm/6 font-medium text-gray-900">Password</label>
             <div class="text-sm">
-              <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-500">Forgot password?</a>
+              <RouterLink to="/forgot-password" class="font-semibold text-indigo-600 hover:text-indigo-500">Forgot password?</RouterLink>
             </div>
           </div>
           <div class="mt-2">
