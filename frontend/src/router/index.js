@@ -21,9 +21,20 @@ const router = createRouter({
       }
     },
     {
+      path: "/forgot-password",
+      name: "forgotPassword",
+      component: () => import("../views/ForgotPasswordView.vue")
+    },
+    {
       path: "/dashboard",
       name: "dashboard",
       component: () => import("../views/DashboardView.vue"),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: "/helpdesk-page",
+      name: "helpdeskPage",
+      component: () => import("../views/HelpdeskPageView.vue"),
       meta: { requiresAuth: true }
     }
   ]
