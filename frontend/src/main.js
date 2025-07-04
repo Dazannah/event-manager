@@ -6,6 +6,7 @@ import App from "./App.vue";
 import router from "./router";
 
 import InputError from "./components/InputError.vue";
+import SuccessMessage from "./components/SuccessMessage.vue";
 
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 axios.defaults.headers.common["Authorization"] = localStorage.getItem("token");
@@ -16,6 +17,7 @@ const app = createApp(App);
 app.config.globalProperties.axios = axios;
 
 app.component("InputError", InputError);
+app.component("SuccessMessage", SuccessMessage);
 
 const isAuthenticated = ref(!!localStorage.getItem("token"));
 app.provide("isAuthenticated", isAuthenticated);
