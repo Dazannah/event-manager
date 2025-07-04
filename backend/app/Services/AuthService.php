@@ -17,8 +17,9 @@ class AuthService implements IAuth {
     if (!$is_login_success)
       $this->invalidCredentialsError();
 
+    $authLevels = $user->isHelpdeskAgent ? 'helpdeskAgent' : null;
 
-    $token = $user->createToken('token')->accessToken;
+    $token = $user->createToken('token', [$authLevels])->accessToken;
 
     return ["token" => $token];
   }
