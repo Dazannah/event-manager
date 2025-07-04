@@ -20,6 +20,9 @@ app.component("InputError", InputError);
 const isAuthenticated = ref(!!localStorage.getItem("token"));
 app.provide("isAuthenticated", isAuthenticated);
 
+const isHelpdeskAgent = ref(localStorage.getItem("isHelpdeskAgent") == "true");
+app.provide("isHelpdeskAgent", isHelpdeskAgent);
+
 app.use(router);
 
 app.mount("#app");
