@@ -1,4 +1,7 @@
 <script>
+import SuccessMessage from "@/components/SuccessMessage.vue";
+import InputError from "@/components/InputError.vue";
+
 export default {
   data() {
     return {
@@ -6,8 +9,30 @@ export default {
         email: ""
       },
       response: {},
-      error: ""
+      error: "",
+      success: ""
     };
+  },
+  methods: {
+    send() {
+      this.resetExceptForm();
+      this.axios
+        .post("/forgot-password", {
+          email: this.form.email
+        })
+        .then(res => {
+          if (res.data.error) this.error = res.data.error;
+          else if (res.data.success) this.success = res.data.success;
+        })
+        .catch(err => {
+          this.error = [err.message];
+        });
+    },
+    resetExceptForm() {
+      this.response = {};
+      this.error = "";
+      this.success = "";
+    }
   }
 };
 </script>
@@ -18,7 +43,7 @@ export default {
     </div>
 
     <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form class="space-y-6" @submit.prevent="login">
+      <form class="space-y-6" @submit.prevent="send">
         <div>
           <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
           <div class="mt-2">
@@ -29,6 +54,7 @@ export default {
 
         <div>
           <InputError v-bind:message="error" />
+          <SuccessMessage v-bind:message="success" />
           <button type="submit" class="flex w-full hover:cursor-pointer justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Send email</button>
         </div>
       </form>
