@@ -6,6 +6,7 @@ use Exception;
 use App\Interfaces\IAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rules\Password as ValidatePassword;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller {
@@ -67,7 +68,7 @@ class AuthController extends Controller {
             $validated_data = $req->validate(
                 [
                     'email' => 'required|email',
-                    'password' => 'required',
+                    'password' => ['required', ValidatePassword::min(8)->numbers()->letters()->mixedCase()->symbols()],
                     'passwordConfirm' => 'required|same:password',
                     'token' => 'required'
                 ]
