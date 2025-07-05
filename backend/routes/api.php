@@ -17,4 +17,6 @@ Route::middleware('auth:api')->prefix('event')->group(function () {
     Route::get('', [EventController::class, "getUserEvents"]);
 
     Route::post('/create', [EventController::class, "create"]);
+    Route::patch('/{event}/edit', [EventController::class, "edit"]);
+    Route::delete('/{event}/delete', [EventController::class, "delete"]);
 });

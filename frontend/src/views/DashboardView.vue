@@ -103,16 +103,15 @@ export default {
       this.isLoading = true;
       this.resetExceptForm();
       this.axios
-        .post(`/event/${form.id}/edit`, {
+        .patch(`/event/${form.id}/edit`, {
           description: form.description
         })
         .then(res => {
           if (res.data.validation_errors) this.response = res.data;
           else if (res.data.error) this.error = res.data.error;
           else {
-            this.success = ["Event created."];
+            this.success = res.data.success;
 
-            this.resetForm();
             this.getEvents();
           }
 
@@ -132,8 +131,9 @@ export default {
           if (res.data.validation_errors) this.response = res.data;
           else if (res.data.error) this.error = res.data.error;
           else {
-            this.success = ["Event created."];
+            this.success = res.data.success;
 
+            this.closeEditModal();
             this.resetForm();
             this.getEvents();
           }

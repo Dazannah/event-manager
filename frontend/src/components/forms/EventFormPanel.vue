@@ -1,6 +1,6 @@
 <script>
 export default {
-  props: ["error", "success", "isLoading", "response", "form", "showDeleteButton", "isEdit"]
+  props: ["error", "success", "isLoading", "response", "form", "showDeleteButton", "isEdit", "deleteEvent"]
 };
 </script>
 
