@@ -9,14 +9,14 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "/dashboard"
+      redirect: "/events"
     },
     {
       path: "/login",
       name: "login",
       component: () => import("../views/LoginView.vue"),
       beforeEnter: (to, from, next) => {
-        if (isAuthenticated()) next({ name: "dashboard" });
+        if (isAuthenticated()) next({ name: "events" });
         else next();
       }
     },
@@ -31,9 +31,9 @@ const router = createRouter({
       component: () => import("../views/ResetPasswordView.vue")
     },
     {
-      path: "/dashboard",
-      name: "dashboard",
-      component: () => import("../views/DashboardView.vue"),
+      path: "/events",
+      name: "events",
+      component: () => import("../views/EventsView.vue"),
       meta: { requiresAuth: true }
     },
     {

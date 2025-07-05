@@ -30,7 +30,7 @@ export default {
       <nav>
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <div class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-            <RouterLink class="hover:text-indigo-600" to="/">Dashboard</RouterLink>
+            <RouterLink class="hover:text-indigo-600" to="/">Events</RouterLink>
           </div>
           <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <div class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
