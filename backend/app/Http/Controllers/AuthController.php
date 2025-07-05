@@ -29,10 +29,10 @@ class AuthController extends Controller {
 
             return response()->json(["error" => ["email" => ["Invalid credentials."]]]);
         } catch (ValidationException $err) {
-            return response()->json(["error" => $err->validator->getMessageBag()]);
+            return response()->json(["validation_errors" => $err->validator->getMessageBag()]);
         } catch (Exception $err) {
             return response()->json(
-                ["error" => $err->getMessage()]
+                ["error" => [$err->getMessage()]]
             );
         }
     }
@@ -45,16 +45,19 @@ class AuthController extends Controller {
                 ]
             );
 
-            Password::sendResetLink(
+            $reset_response = Password::sendResetLink(
                 $req->only('email')
             );
 
-            return response()->json(["success" => ["Reset link successfully sent in email."]]);
+            $response = ["success" => ["Reset link successfully sent in email."]];
+            if (Password::RESET_THROTTLED === $reset_response) $response = ["error" => ["Too many request."]];
+
+            return response()->json($response);
         } catch (ValidationException $err) {
-            return response()->json(["error" => $err->validator->getMessageBag()]);
+            return response()->json(["validation_errors" => $err->validator->getMessageBag()]);
         } catch (Exception $err) {
             return response()->json(
-                ["error" => $err->getMessage()]
+                ["error" => [$err->getMessage()]]
             );
         }
     }
@@ -75,10 +78,10 @@ class AuthController extends Controller {
 
             return response()->json(["error" => ["Something went wrong."]]);
         } catch (ValidationException $err) {
-            return response()->json(["error" => $err->validator->getMessageBag()]);
+            return response()->json(["validation_errors" => $err->validator->getMessageBag()]);
         } catch (Exception $err) {
             return response()->json(
-                ["error" => $err->getMessage()]
+                ["error" => [$err->getMessage()]]
             );
         }
     }
