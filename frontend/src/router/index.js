@@ -9,7 +9,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      redirect: "/events"
+      redirect: "/event"
     },
     {
       path: "/login",
@@ -31,8 +31,8 @@ const router = createRouter({
       component: () => import("../views/ResetPasswordView.vue")
     },
     {
-      path: "/events",
-      name: "events",
+      path: "/event",
+      name: "event",
       component: () => import("../views/EventsView.vue"),
       meta: { requiresAuth: true }
     },

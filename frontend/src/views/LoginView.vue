@@ -50,7 +50,7 @@ export default {
 
             localStorage.setItem("isHelpdeskAgent", isHelpdeskAgent);
 
-            this.router.replace("/events");
+            this.router.replace("/event");
           }
 
           this.isLoading = false;
