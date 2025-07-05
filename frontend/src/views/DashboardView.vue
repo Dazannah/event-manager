@@ -11,7 +11,9 @@ function initData() {
     response: {},
     error: "",
     success: "",
-    isLoading: false
+    isLoading: false,
+    isGetData: false,
+    userTz: Intl.DateTimeFormat().resolvedOptions().timeZone
   };
 }
 
@@ -19,7 +21,7 @@ export default {
   mounted() {
     initFlowbite();
 
-    this.axios.get("/event");
+    this.getEvents();
   },
   data: initData,
   methods: {
@@ -38,6 +40,8 @@ export default {
             this.success = ["Event created."];
 
             this.resetForm();
+
+            this.getEvents();
           }
 
           this.isLoading = false;
@@ -47,6 +51,19 @@ export default {
           this.isLoading = false;
         });
     },
+    getEvents() {
+      this.isGetData = true;
+
+      this.axios
+        .get("/event")
+        .then(res => {
+          this.events = res.data;
+          this.isGetData = false;
+        })
+        .catch(err => {
+          this.isGetData = false;
+        });
+    },
     resetExceptForm() {
       this.response = {};
       this.success = "";
@@ -54,12 +71,14 @@ export default {
     },
     resetForm() {
       this.form = {};
+    },
+    localTzDate(utcDate) {
+      return new Date(`${utcDate}Z`).toLocaleString();
     }
   }
 };
 </script>
 <template>
-  <!-- event form -->
   <nav>
     <div class="max-w-screen-xl px-4 py-3 mx-auto">
       <div class="flex items-center">
@@ -72,6 +91,33 @@ export default {
     </div>
   </nav>
 
+  <Loading v-if="isGetData"></Loading>
+  <div v-else class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th scope="col" class="px-6 py-3">Title</th>
+          <th scope="col" class="px-6 py-3">Occurrence</th>
+          <th scope="col" class="px-6 py-3">Description</th>
+          <th scope="col" class="px-6 py-3">
+            <span class="sr-only">Edit</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="event in events" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+          <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ event.title }}</th>
+          <td class="px-6 py-4">{{ localTzDate(event.occurrence) }}</td>
+          <td class="px-6 py-4">{{ event.description }}</td>
+          <td class="px-6 py-4 text-right">
+            <a href="#" class="font-medium text-indigo-600 dark:text-indigo-500 hover:underline">Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- event form -->
   <!-- Main modal -->
   <div id="event-modal" tabindex="-1" aria-hidden="true" class="hidden bg-gray-900/50 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-md max-h-full">
