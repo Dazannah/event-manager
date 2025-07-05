@@ -2,6 +2,7 @@
 import InputError from "@/components/InputError.vue";
 import { useRouter } from "vue-router";
 import { inject } from "vue";
+import Loading from "@/components/Loading.vue";
 
 function initData() {
   return {
@@ -10,7 +11,8 @@ function initData() {
       password: ""
     },
     response: {},
-    error: ""
+    error: "",
+    isLoading: false
   };
 }
 
@@ -25,6 +27,7 @@ export default {
   data: initData,
   methods: {
     login() {
+      this.isLoading = true;
       this.resetExceptForm();
       this.axios
         .post("/login", {
@@ -32,7 +35,8 @@ export default {
           password: this.form.password
         })
         .then(res => {
-          if (res.data.error) this.response = res.data;
+          if (res.data.validation_errors) this.response = res.data;
+          else if (res.data.error) this.error = res.data.error;
           else {
             localStorage.setItem("token", res.data.token);
             this.axios.defaults.headers.common["Authorization"] = localStorage.getItem("token");
@@ -41,7 +45,6 @@ export default {
             const arrayToken = localStorage.getItem("token").split(".");
             const tokenPayload = JSON.parse(atob(arrayToken[1]));
             const isHelpdeskAgent = tokenPayload.scopes[0] == "helpdeskAgent" ? true : false;
-            console.log(tokenPayload.scopes[0]);
 
             this.isHelpdeskAgent = isHelpdeskAgent;
 
@@ -49,9 +52,13 @@ export default {
 
             this.router.replace("/dashboard");
           }
+
+          this.isLoading = false;
         })
         .catch(err => {
           this.error = [err.message];
+
+          this.isLoading = false;
         });
     },
 
@@ -75,7 +82,7 @@ export default {
           <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
           <div class="mt-2">
             <input type="email" v-model="form.email" autocomplete="email" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            <InputError v-bind:message="response.error?.email" />
+            <InputError v-bind:message="response.validation_errors?.email" />
           </div>
         </div>
 
@@ -88,13 +95,14 @@ export default {
           </div>
           <div class="mt-2">
             <input type="password" v-model="form.password" autocomplete="current-password" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            <InputError v-bind:message="response.error?.password" />
+            <InputError v-bind:message="response.validation_errors?.password" />
           </div>
         </div>
 
         <div>
           <InputError v-bind:message="error" />
-          <button type="submit" class="flex w-full hover:cursor-pointer justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign in</button>
+          <Loading v-if="isLoading"></Loading>
+          <button v-else type="submit" class="flex w-full hover:cursor-pointer justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign in</button>
         </div>
       </form>
     </div>
