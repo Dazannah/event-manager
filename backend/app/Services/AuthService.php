@@ -3,14 +3,14 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Interfaces\IAuth;
+use App\Interfaces\IAuthService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Validation\ValidationException;
 
-class AuthService implements IAuth {
+class AuthService implements IAuthService {
   function reset_password($validated_data): bool {
     $result = Password::reset(
       [
