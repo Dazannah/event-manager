@@ -39,7 +39,7 @@ export default {
           else if (res.data.error) this.error = res.data.error;
           else {
             localStorage.setItem("token", res.data.token);
-            this.axios.defaults.headers.common["Authorization"] = localStorage.getItem("token");
+            this.axios.defaults.headers.common["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
             this.isAuthenticated = true;
 
             const arrayToken = localStorage.getItem("token").split(".");
