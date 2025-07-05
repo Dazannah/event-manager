@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EventController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -11,3 +12,12 @@ Route::get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, "login"]);
 Route::post('/forgot-password', [AuthController::class, "forgot_password"]);
 Route::post('/reset-password', [AuthController::class, "reset_password"]);
+
+Route::middleware('auth:api')->prefix('event')->group(function () {
+    Route::get('', function () {
+        // return user events
+        return [];
+    });
+
+    Route::post('/create', [EventController::class, "create"]);
+});
