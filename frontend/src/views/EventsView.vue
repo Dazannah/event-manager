@@ -1,27 +1,32 @@
 <script>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import EventFormPanel from "@/components/forms/EventFormPanel.vue";
 
 function initData() {
   return {
     events: [],
+    paginator: {},
     form: {
       title: "",
       description: ""
     },
     response: {},
+    globalError: "",
     error: ref(""),
     success: ref(""),
     isLoading: ref(false),
     isGetData: false,
     userTz: Intl.DateTimeFormat().resolvedOptions().timeZone,
     showEditModal: false,
-    showNewModal: false
+    showNewModal: false,
+    router: null
   };
 }
 
 export default {
   mounted() {
+    this.router = useRouter();
     this.getEvents();
   },
   data: initData,
@@ -51,16 +56,25 @@ export default {
           this.isLoading = false;
         });
     },
-    getEvents() {
+    handlePagination(url) {
+      this.getEvents(url);
+
+      this.router.push(url);
+    },
+    getEvents(url = null) {
       this.isGetData = true;
+      const urlQuery = new URL(window.location.href).search;
 
       this.axios
-        .get("/event")
+        .get(url ?? `/event${urlQuery}`)
         .then(res => {
-          this.events = res.data;
+          this.paginator = res.data;
+          this.events = this.paginator.data;
+
           this.isGetData = false;
         })
         .catch(err => {
+          this.globalError = [err.message];
           this.isGetData = false;
         });
     },
@@ -161,30 +175,54 @@ export default {
     </div>
   </nav>
 
+  <InputError v-bind:message="globalError" />
+
   <Loading v-if="isGetData"></Loading>
-  <div v-else class="relative overflow-x-auto shadow-md sm:rounded-lg">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th scope="col" class="px-6 py-3">Title</th>
-          <th scope="col" class="px-6 py-3">Occurrence</th>
-          <th scope="col" class="px-6 py-3">Description</th>
-          <th scope="col" class="px-6 py-3">
-            <span class="sr-only">Edit</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="event in events" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-          <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ event.title }}</th>
-          <td class="px-6 py-4">{{ localTzDate(event.occurrence) }}</td>
-          <td class="px-6 py-4">{{ event.description }}</td>
-          <td class="px-6 py-4 text-right">
-            <button @click="openEditModal(event)" type="button" class="hover:cursor-pointer font-medium text-indigo-600 dark:text-indigo-500 hover:underline">Edit</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div v-else>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">Title</th>
+            <th scope="col" class="px-6 py-3">Occurrence</th>
+            <th scope="col" class="px-6 py-3">Description</th>
+            <th scope="col" class="px-6 py-3">
+              <span class="sr-only">Edit</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="event in events" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ event.title }}</th>
+            <td class="px-6 py-4">{{ localTzDate(event.occurrence) }}</td>
+            <td class="px-6 py-4">{{ event.description }}</td>
+            <td class="px-6 py-4 text-right">
+              <button @click="openEditModal(event)" type="button" class="hover:cursor-pointer font-medium text-indigo-600 dark:text-indigo-500 hover:underline">Edit</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <nav class="flex items-center mt-2" aria-label="Page navigation example">
+      <ul class="flex items-center -space-x-px h-10 text-base">
+        <li v-if="!!paginator.prev_page_url">
+          <button @click="handlePagination(paginator.prev_page_url)" class="hover:cursor-pointer flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+            <span class="sr-only">Previous</span>
+            <svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
+            </svg>
+          </button>
+        </li>
+        <li v-if="!!paginator.next_page_url">
+          <button @click="handlePagination(paginator.next_page_url)" class="hover:cursor-pointer flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+            <span class="sr-only">Next</span>
+            <svg class="w-3 h-3 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
+            </svg>
+          </button>
+        </li>
+      </ul>
+    </nav>
   </div>
 
   <!-- new-event-modal -->

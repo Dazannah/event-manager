@@ -4,12 +4,15 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Interfaces\IEventService;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\Paginator;
 
 class EventService implements IEventService {
 
-  function getUserEvents(int $user_id): Collection {
-    return Event::where('user_id', '=', $user_id)->get();
+  function getUserEvents(int $user_id): Paginator {
+    $events = Event::where('user_id', '=', $user_id)->simplePaginate(10)->withQueryString();
+    $events->withPath('/event');
+
+    return $events;
   }
 
   function create(array $validated_data, int $user_id): void {
