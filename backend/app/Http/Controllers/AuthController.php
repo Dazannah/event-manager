@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use App\Interfaces\IAuth;
+use App\Interfaces\IAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller {
-    private IAuth $auth;
+    private IAuthService $authSevice;
 
-    function __construct(IAuth $auth) {
-        $this->auth = $auth;
+    function __construct(IAuthService $authSevice) {
+        $this->authSevice = $authSevice;
     }
 
     function login(Request $req) {
@@ -24,7 +24,7 @@ class AuthController extends Controller {
                 ]
             );
 
-            if ($response_data = $this->auth->tryLogin($validated_data))
+            if ($response_data = $this->authSevice->tryLogin($validated_data))
                 return response()->json($response_data);
 
             return response()->json(["error" => ["email" => ["Invalid credentials."]]]);
@@ -73,7 +73,7 @@ class AuthController extends Controller {
                 ]
             );
 
-            if ($this->auth->reset_password($validated_data))
+            if ($this->authSevice->reset_password($validated_data))
                 return response()->json(["success" => ["Pasword set successfully"]]);
 
             return response()->json(["error" => ["Something went wrong."]]);
