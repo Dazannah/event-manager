@@ -1,14 +1,16 @@
 <script>
 import { inject } from "vue";
 import { RouterLink, RouterView, useRouter } from "vue-router";
+import Chat from "./components/Chat.vue";
 
 export default {
   setup() {
     const router = useRouter();
     const isAuthenticated = inject("isAuthenticated");
     const isHelpdeskAgent = inject("isHelpdeskAgent");
+    const userId = inject("userId");
 
-    return { router, isAuthenticated, isHelpdeskAgent };
+    return { router, isAuthenticated, isHelpdeskAgent, userId };
   },
   methods: {
     logOut() {
@@ -17,6 +19,9 @@ export default {
 
       localStorage.removeItem("isHelpdeskAgent");
       this.isHelpdeskAgent = false;
+
+      localStorage.removeItem("userId");
+      this.userId = 0;
 
       this.router.replace("/login");
     }
@@ -44,4 +49,5 @@ export default {
   </header>
 
   <RouterView />
+  <Chat />
 </template>

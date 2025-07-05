@@ -168,7 +168,7 @@ export default {
       <div class="flex items-center">
         <ul class="flex flex-row font-medium mt-0 space-x-8 rtl:space-x-reverse text-sm">
           <li>
-            <button @click="openNewModal" type="button" class="focus:outline-none text-white bg-indigo-600 hover:bg-white hover:text-indigo-600 hover:border hover:border-indigo-600 focus:bg-white focus:text-indigo-600 focus:border focus:border-indigo-600 focus:ring-4 hover:border-indigo-600 hover:cursor-pointer focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">New Event</button>
+            <button @click="openNewModal" type="button" class="focus:outline-none text-white bg-indigo-600 hover:bg-white hover:text-indigo-600 border hover:border-indigo-600 focus:bg-white focus:text-indigo-600 focus:border focus:border-indigo-600 focus:ring-4 hover:border-indigo-600 hover:cursor-pointer focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2">New Event</button>
           </li>
         </ul>
       </div>

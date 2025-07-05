@@ -21,8 +21,9 @@ export default {
     const router = useRouter();
     const isAuthenticated = inject("isAuthenticated");
     const isHelpdeskAgent = inject("isHelpdeskAgent");
+    const userId = inject("userId");
 
-    return { router, isAuthenticated, isHelpdeskAgent };
+    return { router, isAuthenticated, isHelpdeskAgent, userId };
   },
   data: initData,
   methods: {
@@ -44,10 +45,13 @@ export default {
 
             const arrayToken = localStorage.getItem("token").split(".");
             const tokenPayload = JSON.parse(atob(arrayToken[1]));
+            const userId = tokenPayload.sub;
             const isHelpdeskAgent = tokenPayload.scopes[0] == "helpdeskAgent" ? true : false;
 
+            this.userId = userId;
             this.isHelpdeskAgent = isHelpdeskAgent;
 
+            localStorage.setItem("userId", userId);
             localStorage.setItem("isHelpdeskAgent", isHelpdeskAgent);
 
             this.router.replace("/event");
