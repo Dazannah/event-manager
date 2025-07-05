@@ -14,10 +14,7 @@ Route::post('/forgot-password', [AuthController::class, "forgot_password"]);
 Route::post('/reset-password', [AuthController::class, "reset_password"]);
 
 Route::middleware('auth:api')->prefix('event')->group(function () {
-    Route::get('', function () {
-        // return user events
-        return [];
-    });
+    Route::get('', [EventController::class, "getUserEvents"]);
 
     Route::post('/create', [EventController::class, "create"]);
 });
