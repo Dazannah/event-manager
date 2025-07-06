@@ -26,10 +26,13 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix('chat')->group(function () {
+        Route::get('', [ChatController::class, "getOpenChat"]);
         Route::post('message', [ChatController::class, "message"]);
     });
+});
 
-    Route::prefix('chat')->middleware(CheckToken::using('helpdeskAgent'))->group(function () {
-        Route::post('helpdesk-message', [ChatController::class, "helpdeskMessage"]);
+Route::middleware(['auth:api', CheckToken::using('helpdeskAgent')])->group(function () {
+    Route::prefix('helpdesk')->group(function () {
+        Route::post('message', [ChatController::class, "helpdeskMessage"]);
     });
 });
