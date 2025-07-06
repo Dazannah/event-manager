@@ -2,14 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\Chat;
+use App\Models\User;
 use App\Models\Message;
+use App\Interfaces\IAiService;
 use App\Events\ChatMessageEvent;
+use App\Events\RefreshChatEvent;
+
 use App\Interfaces\IChatService;
 use App\Events\HelpdeskMessageEvent;
-use App\Interfaces\IAiService;
-use App\Models\Chat;
-
-use function PHPUnit\Framework\isNull;
+use App\Events\HelpdeskRefreshChats;
 
 class ChatService implements IChatService {
 
@@ -25,6 +27,11 @@ class ChatService implements IChatService {
 
     $chat->refresh();
 
+    $chat->user_id;
+    $user = User::where('id', '=', $chat->user_id)->first();
+    broadcast(new RefreshChatEvent($user));
+    broadcast(new HelpdeskRefreshChats());
+
     return $chat;
   }
 
@@ -34,12 +41,18 @@ class ChatService implements IChatService {
 
     $chat->refresh();
 
+    $user = User::where('id', '=', $chat->user_id)->first();
+    broadcast(new RefreshChatEvent($user));
+    broadcast(new HelpdeskRefreshChats());
+
     return $chat;
   }
 
   function handleToAgent(Chat $chat): Chat {
     $chat->handled_to_agent = true;
     $chat->save();
+
+    broadcast(new HelpdeskRefreshChats());
 
     return $chat;
   }
@@ -67,6 +80,8 @@ class ChatService implements IChatService {
 
     $open_chat->user;
     $open_chat->messages;
+
+    $open_chat->touch();
 
     return $open_chat;
   }
