@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
  * Class Chat
  * 
  * @property int $id
+ * @property bool $handled_to_agent
  * @property int $user_id
  * @property int $chat_status_id
  * 
@@ -26,10 +27,11 @@ class Chat extends Model {
 
     protected $fillable = [
         'user_id',
-        'chat_status_id'
+        'chat_status_id',
+        'handled_to_agent'
     ];
 
-    protected $with = ['user', 'chatStatus'];
+    protected $with = ['user', 'chatStatus', 'messages'];
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
