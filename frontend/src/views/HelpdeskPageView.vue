@@ -39,10 +39,17 @@ export default {
       }
     });
 
+    this.helpdeskEcho.private(`helpdesk.updateChats`).listen("HelpdeskRefreshChats", e => {
+      this.getChats();
+
+      this.getFreshActiveChat(this.activeChat.id);
+    });
+
     this.getChats();
   },
   methods: {
     getChats() {
+      this.error = "";
       this.axios
         .get("/helpdesk/chat")
         .then(res => {
@@ -57,44 +64,47 @@ export default {
           this.isChatsLoading = false;
         });
     },
-    getFreshActiveChats(chat_id) {
-      this.activeChat = {};
-      this.axios
-        .get(`/helpdesk/chat/${chat_id}`)
-        .then(res => {
-          if (res.data.chat) this.activeChat = res.data.chat;
-          if (res.data.error) this.error = [res.data.error];
-          if (res.data.validation_errors) this.response = res.data;
+    getFreshActiveChat(chat_id) {
+      if (chat_id) {
+        console.log("refresh");
+        this.activeChat = {};
+        this.error = "";
+        this.axios
+          .get(`/helpdesk/chat/${chat_id}`)
+          .then(res => {
+            if (res.data.chat) this.activeChat = res.data.chat;
+            if (res.data.error) this.error = [res.data.error];
+            if (res.data.validation_errors) this.response = res.data;
 
-          this.chatOpen = res.data.chat.chat_status?.technical_name == "open";
+            this.chatOpen = res.data.chat.chat_status?.technical_name == "open";
 
-          this.isMessagesLoading = false;
+            this.isMessagesLoading = false;
 
-          console.log(this.activeChat);
-          this.scrollToBottom();
-        })
-        .catch(err => {
-          this.error = [err.message];
-          this.isMessagesLoading = false;
-        });
+            this.scrollToBottom();
+          })
+          .catch(err => {
+            this.error = [err.message];
+            this.isMessagesLoading = false;
+          });
+      }
     },
-    startListenChat() {
-      this.helpdeskEcho.private(`helpdesk.${this.activeChat.id}`).listen("ChatMessageEvent", e => {
+    startListenChat(chat_id) {
+      this.helpdeskEcho.private(`helpdesk.${chat_id}`).listen("ChatMessageEvent", e => {
         this.activeChat.messages.push(e.message);
 
         this.scrollToBottom();
       });
     },
-    stopListenChat() {
-      this.helpdeskEcho.leave(`helpdesk.${this.activeChat.id}`);
+    stopListenChat(chat_id) {
+      this.helpdeskEcho.leave(`helpdesk.${chat_id}`);
     },
     loadMessages(chat) {
       this.chatOpen = false;
       this.isMessagesLoading = true;
-      this.stopListenChat();
-      this.getFreshActiveChats(chat.id);
+      this.stopListenChat(this.activeChat.id);
+      this.getFreshActiveChat(chat.id);
 
-      this.startListenChat();
+      this.startListenChat(chat.id);
     },
     scrollToBottom() {
       this.$nextTick(() => {
@@ -106,6 +116,8 @@ export default {
     },
     sendAgentMessage() {
       this.isSendUnderProgress = true;
+      this.error = "";
+
       this.axios
         .post("/helpdesk/message", {
           message: this.message,
@@ -129,6 +141,8 @@ export default {
         });
     },
     closeCurrentChat() {
+      this.error = "";
+
       this.axios
         .patch(`/helpdesk/chat/${this.activeChat.id}/close`)
         .then(res => {
@@ -139,8 +153,8 @@ export default {
           this.chatOpen = res.data.chat.chat_status?.technical_name == "open";
 
           this.isMessagesLoading = false;
+          this.stopListenChat(this.activeChat.id);
 
-          this.getChats();
           this.scrollToBottom();
         })
         .catch(err => {
@@ -148,10 +162,11 @@ export default {
         });
     },
     claimChat() {
+      this.error = "";
+
       this.axios
         .patch(`/helpdesk/chat/${this.activeChat.id}/claim`)
         .then(res => {
-          console.log(res);
           if (res.data.chat) this.activeChat = res.data.chat;
           if (res.data.error) this.error = [res.data.error];
           if (res.data.validation_errors) this.response = res.data;
@@ -160,7 +175,6 @@ export default {
 
           this.isMessagesLoading = false;
 
-          this.getChats();
           this.scrollToBottom();
         })
         .catch(err => {
@@ -172,12 +186,12 @@ export default {
 </script>
 <template>
   <div class="flex max-h-full">
-    <div id="default-sidebar" class="flex flex-col max-h-[80vh] z-40 w-64 h-fit transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
-      <div class="h-fit px-3 py-4 overflow-y-auto bg-indigo-50 dark:bg-gray-800 rounded-lg">
+    <div id="default-sidebar" class="flex flex-col max-h-[80vh] z-40 w-70 h-fit transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
+      <div class="w-full h-fit px-3 py-4 overflow-y-auto bg-indigo-50 dark:bg-gray-800 rounded-lg">
         <ul class="space-y-2 font-medium">
           <Loading v-if="isChatsLoading" />
           <li v-else v-for="chat in chats" :key="`chat-button-${chat.id}`">
-            <button @click="loadMessages(chat)" class="hover:cursor-pointer flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:text-indigo-600 dark:hover:bg-gray-700 group">
+            <button @click="loadMessages(chat)" class="max-w-full hover:cursor-pointer flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:text-indigo-600 dark:hover:bg-gray-700 group">
               <svg class="shrink-0 w-5 h-5 text-gray-900 transition duration-75 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
                 <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
               </svg>
