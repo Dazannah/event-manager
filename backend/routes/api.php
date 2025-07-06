@@ -35,5 +35,10 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware(['auth:api', CheckToken::using('helpdeskAgent')])->group(function () {
     Route::prefix('helpdesk')->group(function () {
         Route::post('message', [ChatController::class, "helpdeskMessage"]);
+
+        Route::get('/chat', [ChatController::class, "getAllChatDescOrder"]);
+        Route::get('/chat/{chat}', [ChatController::class, "getChat"]);
+        Route::patch('/chat/{chat}/close', [ChatController::class, "closeChat"]);
+        Route::patch('/chat/{chat}/claim', [ChatController::class, "claimChat"]);
     });
 });
