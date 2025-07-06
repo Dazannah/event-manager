@@ -8,26 +8,31 @@ use App\Models\Message;
 use Illuminate\Http\Request;
 use App\Events\ChatMessageEvent;
 use App\Events\HelpdeskMessageEvent;
+use App\Interfaces\IChatService;
+use App\Models\Chat;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\ValidationException;
 
 class ChatController extends Controller {
+
+    private IChatService $chatService;
+
+    public function __construct(IChatService $chatService) {
+        $this->chatService = $chatService;
+    }
 
     public function helpdeskMessage(Request $req) {
         try {
             $validated_data = $req->validate([
                 'message' => 'required',
-                'user_id' => 'required|integer'
+                'chat_id' => 'required|integer|exists:chats,id'
             ]);
 
-            $message = new Message([
-                "text" => $validated_data['message'],
-                "user_id" => $validated_data['user_id'],
-                "helpdesk_id" => $req->user()->id
-            ]);
+            $this->chatService->sendHelpdeskAgentMessage($validated_data, $req->user()->id);
 
-            $message->save();
-
-            broadcast(new HelpdeskMessageEvent($message));
+            return response()->json(["success" => "Message successfully sent."]);
+        } catch (ValidationException $err) {
+            return response()->json(["validation_errors" => $err->validator->getMessageBag()]);
         } catch (Exception $err) {
             return response()->json($err);
         }
@@ -36,17 +41,23 @@ class ChatController extends Controller {
     public function message(Request $req) {
         try {
             $validated_data = $req->validate([
-                'message' => 'required'
+                'message' => 'required',
+                'chat_id' => 'required|integer|exists:chats,id'
             ]);
 
-            $message = new Message([
-                "text" => $validated_data['message'],
-                "user_id" => $req->user()->id
-            ]);
+            $chat = Chat::where('id', '=', $validated_data['chat_id'])->first();
 
-            $message->save();
+            if ($chat->chatStatus->technical_name == 'closed' || $chat->id != $req->user()->id)
+                return response()->json(["error" => "You don't have permission to write in this chat."]);
 
-            broadcast(new ChatMessageEvent($message));
+            if ($chat->handled_to_agent)
+                $this->chatService->sendUserMessage($validated_data, $req->user()->id);
+            else
+                $this->chatService->sendUserMessageToAI($validated_data, $req->user()->id);
+
+            return response()->json(["success" => "Message successfully sent."]);
+        } catch (ValidationException $err) {
+            return response()->json(["validation_errors" => $err->validator->getMessageBag()]);
         } catch (Exception $err) {
             return response()->json($err);
         }
