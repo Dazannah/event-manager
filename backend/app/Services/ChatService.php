@@ -7,6 +7,9 @@ use App\Events\ChatMessageEvent;
 use App\Interfaces\IChatService;
 use App\Events\HelpdeskMessageEvent;
 use App\Interfaces\IAiService;
+use App\Models\Chat;
+
+use function PHPUnit\Framework\isNull;
 
 class ChatService implements IChatService {
 
@@ -14,6 +17,40 @@ class ChatService implements IChatService {
 
   function __construct(IAiService $aiService) {
     $this->aiService = $aiService;
+  }
+
+  function handleToAgent(Chat $chat): Chat {
+    $chat->handled_to_agent = true;
+    $chat->save();
+
+    return $chat;
+  }
+
+  function getOpenChat($user_id): Chat {
+    $open_chat = Chat::where([
+      ['user_id', '=', $user_id],
+      ['chat_status_id', '=', 1]
+    ])->first();
+
+    if ($open_chat == null) {
+      $open_chat = Chat::create(
+        [
+          "user_id" => $user_id
+        ]
+      );
+
+      $message = new Message([
+        "text" => "Hello! How can I help you today?",
+        "chat_id" => $open_chat->id
+      ]);
+
+      $message->save();
+    }
+
+    $open_chat->user;
+    $open_chat->messages;
+
+    return $open_chat;
   }
 
   function sendHelpdeskAgentMessage($validated_data, $user_id): void {
@@ -29,7 +66,7 @@ class ChatService implements IChatService {
     broadcast(new HelpdeskMessageEvent($message));
   }
 
-  function sendUserMessage($validated_data, $user_id): void {
+  function sendUserMessage($validated_data, $user_id): Message {
     $message = new Message([
       "text" => $validated_data['message'],
       "user_id" => $user_id,
@@ -40,9 +77,11 @@ class ChatService implements IChatService {
     $message->user;
 
     broadcast(new ChatMessageEvent($message));
+
+    return $message;
   }
 
-  function sendUserMessageToAI($validated_data, $user_id): void {
+  function sendUserMessageToAI($validated_data, $user_id): Message {
     $message = new Message([
       "text" => $validated_data['message'],
       "user_id" => $user_id,
@@ -53,5 +92,7 @@ class ChatService implements IChatService {
     $message->user;
 
     $this->aiService->handleUserMessage($message);
+
+    return $message;
   }
 }

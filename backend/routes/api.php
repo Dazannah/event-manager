@@ -28,6 +28,7 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('chat')->group(function () {
         Route::get('', [ChatController::class, "getOpenChat"]);
         Route::post('message', [ChatController::class, "message"]);
+        Route::patch("ask-for-agent", [ChatController::class, "handleToAgent"]);
     });
 });
 
