@@ -69,7 +69,6 @@ export default {
           chat_id: this.chat.id
         })
         .then(res => {
-          console.log(res);
           if (res.data.message) this.chat.messages.push(res.data.message);
           if (res.data.error) this.error = [res.data.error];
           if (res.data.validation_errors) this.response = res.data;
