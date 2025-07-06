@@ -49,5 +49,5 @@ export default {
   </header>
 
   <RouterView />
-  <Chat />
+  <Chat v-if="this.isAuthenticated" />
 </template>
