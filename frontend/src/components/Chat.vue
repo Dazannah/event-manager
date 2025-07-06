@@ -103,6 +103,17 @@ export default {
 
         this.scrollToBottom();
       });
+
+      this.echo.private(`updateChat.${this.userId}`).listen("RefreshChatEvent", e => {
+        this.disconnect();
+        this.getChat();
+
+        this.scrollToBottom();
+      });
+    },
+    disconnect() {
+      this.echo.leave(`user.${this.chat.id}`);
+      this.echo.leave(`user.updateChat.${this.userId}`);
     },
     toggleChat() {
       if (!this.isChatLoading) {
