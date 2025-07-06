@@ -36,7 +36,7 @@ class Chat extends Model {
     }
 
     public function chatStatus() {
-        return $this->hasOne(ChatStatus::class, 'chat_status_id');
+        return $this->belongsTo(ChatStatus::class, 'chat_status_id');
     }
 
     public function messages() {
