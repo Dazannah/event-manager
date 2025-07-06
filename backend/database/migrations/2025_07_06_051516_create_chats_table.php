@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->boolean('handled_to_agent')->default(false);
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('chat_status_id')->constrained();
+            $table->foreignId('chat_status_id')->default(1)->constrained();
         });
     }
 
