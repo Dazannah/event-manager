@@ -92,8 +92,6 @@ class ChatController extends Controller {
         try {
             $chat = $this->chatService->getOpenChat($req->user()->id);
 
-            $chat->touch();
-
             return response()->json(["chat" => $chat]);
         } catch (Exception $err) {
             return response()->json($err);
