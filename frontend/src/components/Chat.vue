@@ -41,7 +41,8 @@ export default {
       chatMessages: [],
       chat: {},
       echo: {},
-      message: ""
+      message: "",
+      response: {}
     };
   },
   methods: {
@@ -60,6 +61,7 @@ export default {
         });
     },
     sendMessage() {
+      this.response = {};
       this.isSendUnderProgress = true;
       this.axios
         .post("/chat/message", {
@@ -67,8 +69,10 @@ export default {
           chat_id: this.chat.id
         })
         .then(res => {
+          console.log(res);
           if (res.data.message) this.chat.messages.push(res.data.message);
           if (res.data.error) this.error = [res.data.error];
+          if (res.data.validation_errors) this.response = res.data;
 
           this.error = [];
           this.message = "";
@@ -131,7 +135,7 @@ export default {
   <!-- Open Chat Window -->
   <div v-if="isChatOpen" class="fixed bottom-6 right-6 w-80 max-w-full bg-white rounded-lg shadow-lg flex flex-col h-[500px] border border-gray-200">
     <!-- Header -->
-    <div class="px-4 py-3 border-b flex items-center justify-between bg-indigo-600 rounded-t-lg">
+    <div class="px-4 py-1 border-b flex items-center justify-between bg-indigo-600 rounded-t-lg">
       <h3 class="text-lg font-semibold text-white">Help desk</h3>
       <button @click="toggleChat" type="button" class="hover:cursor-pointer text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
         <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -176,6 +180,7 @@ export default {
       </div>
     </div>
     <!-- Input -->
+    <InputError v-bind:message="response.validation_errors?.message" />
     <form @submit.prevent="sendMessage" class="p-2 flex gap-2 bg-gray-200 h-12">
       <input v-model="message" type="text" placeholder="Type your message..." class="h-full block w-full rounded-md bg-white px-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" required />
 
