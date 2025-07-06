@@ -21,6 +21,46 @@ class ChatController extends Controller {
         $this->chatService = $chatService;
     }
 
+    public function claimChat(Request $req, Chat $chat) {
+        try {
+            $updated_chat = $this->chatService->claimChat($chat);
+
+            return response()->json(["chat" => $updated_chat]);
+        } catch (Exception $err) {
+            return response()->json($err);
+        }
+    }
+
+    public function closeChat(Request $req, Chat $chat) {
+        try {
+            $updated_chat = $this->chatService->closeChat($chat);
+
+            return response()->json(["chat" => $updated_chat]);
+        } catch (Exception $err) {
+            return response()->json($err);
+        }
+    }
+
+    public function getChat(Request $req, Chat $chat) {
+        try {
+            return response()->json(["chat" => $chat]);
+        } catch (Exception $err) {
+            return response()->json($err);
+        }
+    }
+
+    public function getAllChatDescOrder(Request $req) {
+        try {
+            $chats = Chat::orderBy('updated_at', 'desc')->get();
+
+            return response()->json(["chats" => $chats]);
+        } catch (ValidationException $err) {
+            return response()->json(["validation_errors" => $err->validator->getMessageBag()]);
+        } catch (Exception $err) {
+            return response()->json($err);
+        }
+    }
+
     public function handleToAgent(Request $req) {
         try {
             $validated_data = $req->validate([
@@ -52,6 +92,8 @@ class ChatController extends Controller {
         try {
             $chat = $this->chatService->getOpenChat($req->user()->id);
 
+            $chat->touch();
+
             return response()->json(["chat" => $chat]);
         } catch (Exception $err) {
             return response()->json($err);
@@ -64,9 +106,9 @@ class ChatController extends Controller {
                 'chat_id' => 'required|integer|exists:chats,id'
             ]);
 
-            $this->chatService->sendHelpdeskAgentMessage($validated_data, $req->user()->id);
+            $message = $this->chatService->sendHelpdeskAgentMessage($validated_data, $req->user()->id);
 
-            return response()->json(["success" => "Message successfully sent."]);
+            return response()->json(["success" => "Message successfully sent.", "message" => $message]);
         } catch (ValidationException $err) {
             return response()->json(["validation_errors" => $err->validator->getMessageBag()]);
         } catch (Exception $err) {
