@@ -30,7 +30,7 @@ class HelpdeskMessageEvent implements ShouldBroadcast {
      */
     public function broadcastOn(): array {
         return [
-            new PrivateChannel('user.' . $this->message->user_id),
+            new PrivateChannel('user.' . $this->message->chat_id),
         ];
     }
 }
