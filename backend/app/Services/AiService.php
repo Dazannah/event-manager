@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Message;
 use App\Interfaces\IAiService;
+use App\Events\ChatMessageEvent;
 use App\Events\HelpdeskMessageEvent;
 use Illuminate\Support\Facades\Http;
 
@@ -32,5 +33,6 @@ class AiService implements IAiService {
     $ai_message->save();
 
     broadcast(new HelpdeskMessageEvent($ai_message));
+    broadcast(new ChatMessageEvent($ai_message));
   }
 }
