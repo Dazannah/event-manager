@@ -36,6 +36,7 @@ export default {
       if (this.form.password != this.form.passwordConfirm) {
         this.error = ["The two password are not the same."];
 
+        this.isLoading = false;
         return;
       }
 
