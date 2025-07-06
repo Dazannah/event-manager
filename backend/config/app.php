@@ -15,6 +15,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
     'frontend_url' => env('FRONTEND_URL', null),
+    'ai_url' => env('AI_URL', null),
 
     /*
     |--------------------------------------------------------------------------
