@@ -19,6 +19,24 @@ class ChatService implements IChatService {
     $this->aiService = $aiService;
   }
 
+  function claimChat(Chat $chat): Chat {
+    $chat->handled_to_agent = true;
+    $chat->save();
+
+    $chat->refresh();
+
+    return $chat;
+  }
+
+  function closeChat(Chat $chat): Chat {
+    $chat->chat_status_id = 2;
+    $chat->save();
+
+    $chat->refresh();
+
+    return $chat;
+  }
+
   function handleToAgent(Chat $chat): Chat {
     $chat->handled_to_agent = true;
     $chat->save();
@@ -53,7 +71,7 @@ class ChatService implements IChatService {
     return $open_chat;
   }
 
-  function sendHelpdeskAgentMessage($validated_data, $user_id): void {
+  function sendHelpdeskAgentMessage($validated_data, $user_id): Message {
     $message = new Message([
       "text" => $validated_data['message'],
       "user_id" => $user_id,
@@ -64,6 +82,8 @@ class ChatService implements IChatService {
     $message->user;
 
     broadcast(new HelpdeskMessageEvent($message));
+
+    return $message;
   }
 
   function sendUserMessage($validated_data, $user_id): Message {
@@ -90,6 +110,8 @@ class ChatService implements IChatService {
 
     $message->save();
     $message->user;
+
+    broadcast(new ChatMessageEvent($message));
 
     $this->aiService->handleUserMessage($message);
 
