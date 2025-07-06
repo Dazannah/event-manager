@@ -13,8 +13,8 @@ return new class extends Migration {
             $table->id();
             $table->timestamps();
             $table->text('text');
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('helpdesk_id')->nullable();
+            $table->foreignId('user_id')->nullable();
+            $table->foreignId('chat_id')->nullable();
         });
     }
 
