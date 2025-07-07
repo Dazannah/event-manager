@@ -4,11 +4,12 @@ namespace App\Services;
 
 use App\Models\Chat;
 use App\Models\User;
+use App\Models\Event;
 use App\Models\Message;
 use App\Interfaces\IAiService;
 use App\Events\ChatMessageEvent;
-use App\Events\RefreshChatEvent;
 
+use App\Events\RefreshChatEvent;
 use App\Interfaces\IChatService;
 use App\Events\HelpdeskMessageEvent;
 use App\Events\HelpdeskRefreshChats;
@@ -128,7 +129,8 @@ class ChatService implements IChatService {
 
     broadcast(new ChatMessageEvent($message));
 
-    $this->aiService->handleUserMessage($message);
+    $events = Event::where('user_id', '=', $user_id)->get();
+    $this->aiService->handleUserMessage($message, $events);
 
     return $message;
   }

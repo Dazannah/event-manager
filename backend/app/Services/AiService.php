@@ -7,15 +7,17 @@ use App\Interfaces\IAiService;
 use App\Events\ChatMessageEvent;
 use App\Events\HelpdeskMessageEvent;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Database\Eloquent\Collection;
 
 class AiService implements IAiService {
-  public function handleUserMessage(Message $user_message): void {
+  public function handleUserMessage(Message $user_message, Collection $events): void {
+    $json_events = json_encode($events);
 
     $system_prompt = <<<END
     You are a kind assistant, and answer the questions shortly.
     END;
 
-    $prompt = $system_prompt . "\nUser: " . $user_message->text;
+    $prompt = $system_prompt . "\nUser events: " . $json_events  . "\nUser question: " . $user_message->text;
 
     $response = Http::post(config('app.ai_url') . '/api/generate', [
       "model" => "mistral",
