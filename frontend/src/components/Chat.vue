@@ -113,7 +113,7 @@ export default {
     },
     disconnect() {
       this.echo.leave(`user.${this.chat.id}`);
-      this.echo.leave(`user.updateChat.${this.userId}`);
+      this.echo.leave(`updateChat.${this.userId}`);
     },
     toggleChat() {
       if (!this.isChatLoading) {
